@@ -233,7 +233,7 @@ function makeResponsive() {
             .attr("y", -30)
             .attr("value", "healthcare") // value to grab for event listener
             .classed("active", true)
-            .text("Healthcare (%)");
+            .text("Lacks Healthcare (%)");
 
         var smokesLabel = yaxislabelsGroup.append("text")
             .attr("x", -200)
