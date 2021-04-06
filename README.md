@@ -2,4 +2,5 @@
 <p float="left">
 <img src = "https://github.com/BanuNathan/D3-Challenge/blob/main/assets/data/Screenshot%20(102).png">
 <img src = "https://github.com/BanuNathan/D3-Challenge/blob/main/assets/data/Screenshot%20(102).png">
+  <img src = "https://github.com/BanuNathan/D3-Challenge/blob/main/assets/data/Screenshot%20(102).png">
 </p>
