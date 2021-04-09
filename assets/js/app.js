@@ -44,11 +44,11 @@ function makeResponsive() {
         // function used for updating x-scale var upon click on axis label
         function xScale(povertyData, chosenXAxis) {
         // create scales
-        var xLinearScale = d3.scaleLinear()
-            .domain([d3.min(povertyData, d => d[chosenXAxis]) * 0.8,
-            d3.max(povertyData, d => d[chosenXAxis]) * 1.2
-            ])
-            .range([0, width]);
+            var xLinearScale = d3.scaleLinear()
+                .domain([d3.min(povertyData, d => d[chosenXAxis]) * 0.8,
+                d3.max(povertyData, d => d[chosenXAxis]) * 1.2
+                ])
+                .range([0, width]);
             return xLinearScale;
 
         }
@@ -89,26 +89,45 @@ function makeResponsive() {
         // new circles
         function renderCircles(circlesGroup, newXScale, chosenXAxis, newYScale, chosenYAxis) {
 
-            if (chosenXAxis === "poverty"){
+                if (chosenXAxis === "poverty"){
                     chosenColor = "lightgreen"
                 }else if(chosenXAxis === "age"){
                     chosenColor = "pink"
                 }else {
                     chosenColor = "lightblue"
                 }
-            circlesGroup.transition()
-                .duration(1000)
-                .attr("cx", d => newXScale(d[chosenXAxis]))
-                .attr("cy", d => newYScale(d[chosenYAxis]))
-                .attr("fill", chosenColor);
-
-            // circlesGroup.transition()
-            //     .duration(1000)
-            //     .attr("cy", d => newYScale(d[chosenYAxis]));
-
-            return circlesGroup;
+                console.log(chosenColor)
+                console.log(chosenXAxis)
+                console.log(chosenYAxis)
+                circlesGroup.transition()
+                    .duration(1000)
+                    .attr("cx", d => newXScale(d[chosenXAxis]))
+                    .attr("cy", d => newYScale(d[chosenYAxis]))
+                    .attr("fill", chosenColor);
+                return circlesGroup;
         }
 
+
+        function renderText(textGroup, newXScale, newYScale, chosenXAxis, chosenYAxis)
+        {
+                console.log(chosenYAxis)
+                console.log(chosenXAxis)
+                textGroup.transition()
+                .duration(2000)
+                // .attr("x", d => newXScale(d[chosenXAxis]))
+                // .attr("y", d => newYScale(d[chosenYAxis]))
+                // .text(d => d.abbr);
+
+                .attr("x", d => newXScale(d[chosenXAxis]))
+                .attr("y", d => newYScale(d[chosenYAxis]))
+                .attr("dy", 3)
+                .attr('font-size',8)
+                .text(d => d.abbr)
+            
+              
+        
+            return textGroup;
+        }
 
             // function used for updating circles group with new tooltip
     function updateToolTip(chosenXAxis, chosenYAxis, circlesGroup) {
@@ -118,15 +137,6 @@ function makeResponsive() {
 
         xlabel = chosenXAxis;
         ylabel = chosenYAxis;
-
-        // if (chosenXAxis === "poverty") {
-        //     xlabel = "poverty:";
-        // }
-        // else if (chosenXAxis === "age") {
-        //     xlabel = "Age (Median)";
-        // } else {
-        //     xlabel = "Income";
-        // }
 
         var toolTip = d3.tip()
             .attr("class", "tooltip")
@@ -180,20 +190,33 @@ function makeResponsive() {
 
         // append y axis
         var yAxis = chartGroup.append("g")
-            .call(leftAxis);
-
-        // append initial circles
-        var circlesGroup = chartGroup.selectAll("circle")
+             .classed("y-axis", true)
+             .call(leftAxis);
+   
+        var circlesGroup = chartGroup.append("g")
+            .selectAll("circle")
             .data(povertyData)
             .enter()
             .append("circle")
             .attr("cx", d => xLinearScale(d[chosenXAxis]))
             .attr("cy", d => yLinearScale(d[chosenYAxis]))
-            .attr("r", 10)
-            .attr("fill",  chosenColor)
-            .attr("opacity", ".5")
-            .text(function(d){return d.abbr})
-            
+            .attr("r", 15)
+            .attr("fill", chosenColor)
+            .attr("opacity", "0.7")
+            .classed("stateCircle", true);
+        
+        var textGroup = chartGroup.append("g")
+            .selectAll("text")
+            .data(povertyData)
+            .enter()
+            .append("text")
+            .attr("x", d => xLinearScale(d[chosenXAxis]))
+            .attr("y", d => yLinearScale(d[chosenYAxis]))
+            .attr("dy", 3)
+            .attr('font-size',8)
+            .text(d => d.abbr)
+            .classed("stateText", true)
+            .attr("text-anchor", "middle");
 
         // Create group for three x-axis labels
         var labelsGroup = chartGroup.append("g")
@@ -261,6 +284,7 @@ function makeResponsive() {
 
                 // replaces chosenXAxis with value
                 chosenXAxis = value;
+                
 
                 // console.log(chosenXAxis)
 
@@ -273,6 +297,8 @@ function makeResponsive() {
 
                 // updates circles with new x values
                 circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
+
+                textGroup = renderText(textGroup, xLinearScale, yLinearScale, chosenYAxis, chosenXAxis);
 
                 // updates tooltips with new info
                 circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
@@ -317,6 +343,8 @@ function makeResponsive() {
             // updates circles with new x values
             circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
 
+            textGroup = renderText(textGroup, xLinearScale, yLinearScale, chosenYAxis, chosenXAxis);
+
             // updates tooltips with new info
             circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
 
@@ -336,6 +364,11 @@ function makeResponsive() {
                 .classed("active", obesityBold)
                 .classed("inactive", !obesityBold);
             
+            
+            console.log(healthcareBold);
+            console.log(smokesBold);
+            console.log(obesityBold);
+
 
             }
             });
