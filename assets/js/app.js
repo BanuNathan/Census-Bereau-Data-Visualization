@@ -96,9 +96,6 @@ function makeResponsive() {
                 }else {
                     chosenColor = "lightblue"
                 }
-                console.log(chosenColor)
-                console.log(chosenXAxis)
-                console.log(chosenYAxis)
                 circlesGroup.transition()
                     .duration(1000)
                     .attr("cx", d => newXScale(d[chosenXAxis]))
@@ -110,22 +107,13 @@ function makeResponsive() {
 
         function renderText(textGroup, newXScale, newYScale, chosenXAxis, chosenYAxis)
         {
-                console.log(chosenYAxis)
-                console.log(chosenXAxis)
+           
                 textGroup.transition()
-                .duration(2000)
-                // .attr("x", d => newXScale(d[chosenXAxis]))
-                // .attr("y", d => newYScale(d[chosenYAxis]))
-                // .text(d => d.abbr);
-
-                .attr("x", d => newXScale(d[chosenXAxis]))
-                .attr("y", d => newYScale(d[chosenYAxis]))
-                .attr("dy", 3)
-                .attr('font-size',8)
+                .duration(1000)
                 .text(d => d.abbr)
-            
-              
-        
+                .attr('font-size', 10)//font size
+                .attr('dx', d => newXScale(d[chosenXAxis]))//positions text towards the left of the center of the circle
+                .attr('dy', d => newYScale(d[chosenYAxis]))       
             return textGroup;
         }
 
@@ -200,21 +188,21 @@ function makeResponsive() {
             .append("circle")
             .attr("cx", d => xLinearScale(d[chosenXAxis]))
             .attr("cy", d => yLinearScale(d[chosenYAxis]))
-            .attr("r", 15)
+            .attr("r", 18)
             .attr("fill", chosenColor)
             .attr("opacity", "0.7")
             .classed("stateCircle", true);
         
-        var textGroup = chartGroup.append("g")
-            .selectAll("text")
+        var textGroup = chartGroup.append('g')
+            .selectAll('text')
             .data(povertyData)
             .enter()
-            .append("text")
-            .attr("x", d => xLinearScale(d[chosenXAxis]))
-            .attr("y", d => yLinearScale(d[chosenYAxis]))
-            .attr("dy", 3)
-            .attr('font-size',8)
+            .append('text')
             .text(d => d.abbr)
+            .attr('font-size', 10)//font size
+            .attr('x', d => xLinearScale(d[chosenXAxis]))//positions text towards the left of the center of the circle
+            .attr('y',d => yLinearScale(d[chosenYAxis]))
+            .attr("dy", 3)
             .classed("stateText", true)
             .attr("text-anchor", "middle");
 
@@ -284,19 +272,30 @@ function makeResponsive() {
 
                 // replaces chosenXAxis with value
                 chosenXAxis = value;
-                
+                console.log(chosenYAxis)
 
                 // console.log(chosenXAxis)
 
                 // functions here found above csv import
                 // updates x scale for new data
                 xLinearScale = xScale(povertyData, chosenXAxis);
+                yLinearScale=yScale(povertyData,chosenYAxis);
+            
 
                 // updates x axis with transition
                 xAxis = renderAxes(xLinearScale, xAxis);
+                yAxis=renderYAxes(yLinearScale, yAxis);
 
                 // updates circles with new x values
                 circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
+                
+                xLinearScale = xScale(povertyData, chosenXAxis);
+                yLinearScale=yScale(povertyData,chosenYAxis);
+            
+
+                // updates x axis with transition
+                xAxis = renderAxes(xLinearScale, xAxis);
+                yAxis=renderYAxes(yLinearScale, yAxis);
 
                 textGroup = renderText(textGroup, xLinearScale, yLinearScale, chosenYAxis, chosenXAxis);
 
@@ -364,10 +363,6 @@ function makeResponsive() {
                 .classed("active", obesityBold)
                 .classed("inactive", !obesityBold);
             
-            
-            console.log(healthcareBold);
-            console.log(smokesBold);
-            console.log(obesityBold);
 
 
             }
