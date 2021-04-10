@@ -3,16 +3,35 @@ function makeResponsive() {
     // if the SVG area isn't empty when the browser loads,
     // remove it and replace it with a resized version of the chart
     var svgArea = d3.select("body").select("svg");
+    var povertyData = [];
+    d3.csv("assets/data/data.csv").then(function(povertyList, err) {
+        if (err) throw err;
+        // parse data
+        povertyList.forEach(function(povertyData) {
+            povertyData.poverty = +povertyData.poverty;
+            povertyData.income = +povertyData.income;
+            povertyData.healthcare = +povertyData.healthcare;
+            povertyData.age = +povertyData.age;
+            povertyData.obesity = +povertyData.obesity;
+            povertyData.smokes = +povertyData.smokes;
+        });
+        povertyData = povertyList;
+    });
+
+    var xLinearScale = xScale(povertyData, chosenXAxis);
+
+        // Create y scale function
+    var yLinearScale = yScale(povertyData, chosenYAxis);
+    
+
 
     if (!svgArea.empty()) {
         svgArea.remove();
     }
 
+
     var svgWidth = parseInt(d3.select("#scatter").style("width"));
     var svgHeight = svgWidth - svgWidth / 4;
-
-        // var svgWidth = 960;
-        // var svgHeight = 500;
 
         var margin = {
         top: 20,
@@ -84,10 +103,13 @@ function makeResponsive() {
             return yAxis;
             }
 
+            
 
-        // function used for updating circles group with a transition to
-        // new circles
         function renderCircles(circlesGroup, newXScale, chosenXAxis, newYScale, chosenYAxis) {
+            var xLinearScale = xScale(povertyData, chosenXAxis);
+
+        // Create y scale function
+        var yLinearScale = yScale(povertyData, chosenYAxis);
 
                 if (chosenXAxis === "poverty"){
                     chosenColor = "lightgreen"
@@ -98,22 +120,28 @@ function makeResponsive() {
                 }
                 circlesGroup.transition()
                     .duration(1000)
-                    .attr("cx", d => newXScale(d[chosenXAxis]))
-                    .attr("cy", d => newYScale(d[chosenYAxis]))
+                    .attr("cx", d => xLinearScale(d[chosenXAxis]))
+                    .attr("cy", d => yLinearScale(d[chosenYAxis]))
                     .attr("fill", chosenColor);
                 return circlesGroup;
         }
 
 
-        function renderText(textGroup, newXScale, newYScale, chosenXAxis, chosenYAxis)
+        function renderText(textGroup, newXScale, chosenXAxis, newYScale, chosenYAxis)
         {
+            var xLinearScale = xScale(povertyData, chosenXAxis);
+
+        // Create y scale function
+        var yLinearScale = yScale(povertyData, chosenYAxis);
            
+            // .attr("text-anchor", "middle");
+
                 textGroup.transition()
                 .duration(1000)
                 .text(d => d.abbr)
                 .attr('font-size', 10)//font size
-                .attr('dx', d => newXScale(d[chosenXAxis]))//positions text towards the left of the center of the circle
-                .attr('dy', d => newYScale(d[chosenYAxis]))       
+                .attr("x", d => xLinearScale(d[chosenXAxis]))
+                .attr("y", d => yLinearScale(d[chosenYAxis]));       
             return textGroup;
         }
 
@@ -160,6 +188,7 @@ function makeResponsive() {
             povertyData.obesity = +povertyData.obesity;
             povertyData.smokes = +povertyData.smokes;
         });
+        
         // xLinearScale function above csv import
         var xLinearScale = xScale(povertyData, chosenXAxis);
 
@@ -200,9 +229,10 @@ function makeResponsive() {
             .append('text')
             .text(d => d.abbr)
             .attr('font-size', 10)//font size
-            .attr('x', d => xLinearScale(d[chosenXAxis]))//positions text towards the left of the center of the circle
+            .attr('x', d => xLinearScale(d[chosenXAxis]))
             .attr('y',d => yLinearScale(d[chosenYAxis]))
             .attr("dy", 3)
+            .attr("dx",2)
             .classed("stateText", true)
             .attr("text-anchor", "middle");
 
@@ -272,37 +302,17 @@ function makeResponsive() {
 
                 // replaces chosenXAxis with value
                 chosenXAxis = value;
-                console.log(chosenYAxis)
-
-                // console.log(chosenXAxis)
-
-                // functions here found above csv import
-                // updates x scale for new data
+              
                 xLinearScale = xScale(povertyData, chosenXAxis);
-                yLinearScale=yScale(povertyData,chosenYAxis);
-            
 
                 // updates x axis with transition
                 xAxis = renderAxes(xLinearScale, xAxis);
-                yAxis=renderYAxes(yLinearScale, yAxis);
-
                 // updates circles with new x values
                 circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
-                
-                xLinearScale = xScale(povertyData, chosenXAxis);
-                yLinearScale=yScale(povertyData,chosenYAxis);
-            
-
-                // updates x axis with transition
-                xAxis = renderAxes(xLinearScale, xAxis);
-                yAxis=renderYAxes(yLinearScale, yAxis);
-
-                textGroup = renderText(textGroup, xLinearScale, yLinearScale, chosenYAxis, chosenXAxis);
+                textGroup = renderText(textGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
 
                 // updates tooltips with new info
                 circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
-
-
                 // changes classes to change bold text
                 var ageBold = chosenXAxis === "age";
                 var povertyBold = chosenXAxis === "poverty";
@@ -342,7 +352,7 @@ function makeResponsive() {
             // updates circles with new x values
             circlesGroup = renderCircles(circlesGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
 
-            textGroup = renderText(textGroup, xLinearScale, yLinearScale, chosenYAxis, chosenXAxis);
+            textGroup = renderText(textGroup, xLinearScale, chosenXAxis, yLinearScale, chosenYAxis);
 
             // updates tooltips with new info
             circlesGroup = updateToolTip(chosenXAxis, chosenYAxis, circlesGroup);
@@ -373,8 +383,6 @@ function makeResponsive() {
 }
 
 makeResponsive();
-    
-    // Event listener for window resize.
-    // When the browser window is resized, makeResponsive() is called.
+
 d3.select(window).on("resize", makeResponsive);
 
